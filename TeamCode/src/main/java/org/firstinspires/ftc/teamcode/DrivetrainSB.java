@@ -12,24 +12,27 @@ import com.qualcomm.robotcore.hardware.Servo;
 @TeleOp
 public class DrivetrainSB extends LinearOpMode {
 
-    DcMotorEx frontLeft;
-    DcMotorEx frontRight;
-    DcMotorEx backLeft;
-    DcMotorEx backRight;
-    DcMotor shooter;
-    boolean shooterToggle = true;
-    double shooterPower = 1;
-    double currentShooterPower = shooterPower;
-    double leftServoPos = 0;
-    double rightServoPos = 1;
-    double transferServoOffset = 0.3;
-    double shooterAngle;
-    Servo servoRight;
-    Servo servoLeft;
-    Servo angleAdjust;
+    DcMotorEx frontLeft; // Drivetrain Motor
+    DcMotorEx frontRight; // Drivetrain Motor
+    DcMotorEx backLeft; // Drivetrain Motor
+    DcMotorEx backRight; // Drivetrain Motor
+    DcMotor shooter; // shooter flywheel motor
+    boolean shooterToggleReversed = true; // state of shooter, true = released/updated, false = button held
+    double shooterPower = 1; // power of shooter flywheel motor 0-1 
+    double currentShooterPower = shooterPower; // current power of shooter flywheel motor 0 - 1
+    double leftServoPosition = 0; // current position of left transfer servo 0 - 1
+    double rightServoPosition = 1; // current position of right transfer servo 0 - 1
+    double transferServoMovement = 0.3; // how much the transfer servos move if the button is held until the end0 - 1
+    double shooterAngle; // angle of the ramp relative to the servo 0 - 1
+    Servo servoRight; // transfer servo
+    Servo servoLeft; // transfer servo
+    Servo angleAdjust; // NON-FUNCTIONAL // servo adjusting the slope of the ramp 0 - 1
 
     @Override
     public void runOpMode() throws InterruptedException {
+        
+        // motor mapping
+        
         frontLeft = hardwareMap.get(DcMotorEx.class, "leftUp");
         frontLeft.setZeroPowerBehavior(DcMotorEx.ZeroPowerBehavior.FLOAT);
         frontRight = hardwareMap.get(DcMotorEx.class, "rightUp");
@@ -40,6 +43,8 @@ public class DrivetrainSB extends LinearOpMode {
         backRight.setZeroPowerBehavior(DcMotorEx.ZeroPowerBehavior.FLOAT);
         shooter = hardwareMap.get(DcMotor.class, "shooter");
 
+        // servo mapping
+        
         servoLeft = hardwareMap.get(Servo.class, "leftServo");
         servoRight = hardwareMap.get(Servo.class, "rightServo");
         angleAdjust = hardwareMap.get(Servo.class, "angleAdjust");
@@ -48,9 +53,8 @@ public class DrivetrainSB extends LinearOpMode {
 
         servoRight.setDirection(Servo.Direction.REVERSE);
         servoLeft.setDirection(Servo.Direction.REVERSE);
-        servoRight.setPosition(rightServoPos);
-        servoLeft.setPosition(leftServoPos);
-
+        servoRight.setPosition(rightServoPosition);
+        servoLeft.setPosition(leftServoPosition);
         frontLeft.setDirection(DcMotorEx.Direction.REVERSE);
         backRight.setDirection(DcMotorEx.Direction.REVERSE);
 
@@ -59,10 +63,11 @@ public class DrivetrainSB extends LinearOpMode {
         while(opModeIsActive() && !isStopRequested()) {
 
             // Input requests
-            rightServoPos = servoRight.getPosition();
-            leftServoPos = servoLeft.getPosition();
+            rightServoPosition = servoRight.getPosition();
+            leftServoPosition = servoLeft.getPosition();
             shooterAngle = angleAdjust.getPosition();
-            // Drivetrain
+            
+            // Mechanum Drivetrain
 
             double y = gamepad1.left_stick_y;
             double x = -gamepad1.left_stick_x;
@@ -81,12 +86,12 @@ public class DrivetrainSB extends LinearOpMode {
 
             // Shooter Motor Toggle
 
-            if(gamepad1.crossWasPressed() && shooterToggle){
+            if(gamepad1.crossWasPressed() && shooterToggleReversed){
                 shooter.setPower(currentShooterPower);
-                shooterToggle = false;
+                shooterToggleReversed = false;
             }
             if (gamepad1.crossWasReleased()) {
-                shooterToggle = true;
+                shooterToggleReversed = true;
                 if (currentShooterPower == shooterPower) {
                     currentShooterPower = 0;
                 } else {
@@ -94,7 +99,7 @@ public class DrivetrainSB extends LinearOpMode {
                 }
             }
 
-            // Shooter Angle Adjuster
+            // NON-FUNCTIONAL // Shooter Angle Adjuster
 
             if (gamepad1.rightBumperWasPressed()) {
                 shooterAngle = shooterAngle - 0.1;
@@ -105,17 +110,19 @@ public class DrivetrainSB extends LinearOpMode {
                 angleAdjust.setPosition(shooterAngle);
             }
 
-            // Servo for Shooter
+            // Transfer Servo toggle
 
             if (gamepad1.triangleWasPressed()) {
-                servoRight.setPosition(rightServoPos - transferServoOffset);
-                servoLeft.setPosition(leftServoPos + transferServoOffset);
+                servoRight.setPosition(rightServoPosition - transferServoMovement);
+                servoLeft.setPosition(leftServoPosition + transferServoMovement);
             }
             if (gamepad1.triangleWasReleased()) {
-                servoRight.setPosition(rightServoPos + transferServoOffset);
-                servoLeft.setPosition(leftServoPos - transferServoOffset);
+                servoRight.setPosition(rightServoPosition + transferServoMovement);
+                servoLeft.setPosition(leftServoPosition - transferServoMovement);
             }
-
+            
+            // Telemetry
+            
             telemetry.addData("ShooterAngle", shooterAngle);
             telemetry.update();
 
