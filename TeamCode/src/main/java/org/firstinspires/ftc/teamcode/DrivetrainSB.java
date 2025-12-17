@@ -2,8 +2,11 @@ package org.firstinspires.ftc.teamcode;
 
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
+import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.Servo;
+
+
 
 
 @TeleOp
@@ -13,10 +16,10 @@ public class DrivetrainSB extends LinearOpMode {
     DcMotorEx frontRight;
     DcMotorEx backLeft;
     DcMotorEx backRight;
-    DcMotorEx shooter;
-    DcMotorEx highShooter;
+    DcMotor shooter;
     boolean shooterToggle = true;
-    double shooterPower = 0.71;
+    double shooterPower = 0.8;
+    double currentShooterPower = shooterPower;
     double prevServoPos = 1;
     double shooterAngle;
     Servo servoRight;
@@ -33,9 +36,7 @@ public class DrivetrainSB extends LinearOpMode {
         backLeft.setZeroPowerBehavior(DcMotorEx.ZeroPowerBehavior.FLOAT);
         backRight = hardwareMap.get(DcMotorEx.class, "rightDown");
         backRight.setZeroPowerBehavior(DcMotorEx.ZeroPowerBehavior.FLOAT);
-
-        shooter = hardwareMap.get(DcMotorEx.class, "shooter");
-        highShooter = hardwareMap.get(DcMotorEx.class, "highShooter");
+        shooter = hardwareMap.get(DcMotor.class, "shooter");
 
         servoLeft = hardwareMap.get(Servo.class, "leftServo");
         servoRight = hardwareMap.get(Servo.class, "rightServo");
@@ -78,24 +79,23 @@ public class DrivetrainSB extends LinearOpMode {
             // Shooter Motor Toggle
 
             if(gamepad1.crossWasPressed() && shooterToggle){
-                shooter.setPower(shooterPower);
-                highShooter.setPower(shooterPower);
+                shooter.setPower(currentShooterPower);
                 shooterToggle = false;
             }
             if (gamepad1.crossWasReleased()) {
                 shooterToggle = true;
-                if (shooterPower == 0.71) {
-                    shooterPower = 0;
+                if (currentShooterPower == shooterPower) {
+                    currentShooterPower = 0;
                 } else {
-                    shooterPower = 0.71;
+                    currentShooterPower = shooterPower;
                 }
             }
 
             // Shooter Angle Adjuster
 
             if (gamepad1.rightBumperWasPressed()) {
-              shooterAngle--;
-              angleAdjust.setPosition(shooterAngle);
+                shooterAngle--;
+                angleAdjust.setPosition(shooterAngle);
             }
             if (gamepad1.leftBumperWasPressed()) {
                 shooterAngle++;
