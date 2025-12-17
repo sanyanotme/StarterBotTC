@@ -18,9 +18,11 @@ public class DrivetrainSB extends LinearOpMode {
     DcMotorEx backRight;
     DcMotor shooter;
     boolean shooterToggle = true;
-    double shooterPower = 0.8;
+    double shooterPower = 1;
     double currentShooterPower = shooterPower;
-    double prevServoPos = 1;
+    double leftServoPos = 0;
+    double rightServoPos = 1;
+    double transferServoOffset = 0.3;
     double shooterAngle;
     Servo servoRight;
     Servo servoLeft;
@@ -46,8 +48,8 @@ public class DrivetrainSB extends LinearOpMode {
 
         servoRight.setDirection(Servo.Direction.REVERSE);
         servoLeft.setDirection(Servo.Direction.REVERSE);
-        servoRight.setPosition(prevServoPos);
-        servoLeft.setPosition(1 - prevServoPos);
+        servoRight.setPosition(rightServoPos);
+        servoLeft.setPosition(leftServoPos);
 
         frontLeft.setDirection(DcMotorEx.Direction.REVERSE);
         backRight.setDirection(DcMotorEx.Direction.REVERSE);
@@ -57,7 +59,8 @@ public class DrivetrainSB extends LinearOpMode {
         while(opModeIsActive() && !isStopRequested()) {
 
             // Input requests
-
+            rightServoPos = servoRight.getPosition();
+            leftServoPos = servoLeft.getPosition();
             shooterAngle = angleAdjust.getPosition();
             // Drivetrain
 
@@ -94,29 +97,23 @@ public class DrivetrainSB extends LinearOpMode {
             // Shooter Angle Adjuster
 
             if (gamepad1.rightBumperWasPressed()) {
-                shooterAngle--;
+                shooterAngle = shooterAngle - 0.1;
                 angleAdjust.setPosition(shooterAngle);
             }
             if (gamepad1.leftBumperWasPressed()) {
-                shooterAngle++;
+                shooterAngle = shooterAngle + 0.1;
                 angleAdjust.setPosition(shooterAngle);
             }
 
             // Servo for Shooter
 
-            if (gamepad1.triangleWasPressed() ) {
-                prevServoPos = prevServoPos - 0.4;
-                servoRight.setPosition(prevServoPos);
-                servoLeft.setPosition(1 - prevServoPos);
-
-                telemetry.addData("LeftServo", servoLeft.getPosition());
-                telemetry.addData("RightServo", servoRight.getPosition());
-
+            if (gamepad1.triangleWasPressed()) {
+                servoRight.setPosition(rightServoPos - transferServoOffset);
+                servoLeft.setPosition(leftServoPos + transferServoOffset);
             }
             if (gamepad1.triangleWasReleased()) {
-                prevServoPos = prevServoPos + 0.4;
-                servoRight.setPosition(prevServoPos);
-                servoLeft.setPosition(1 - prevServoPos);
+                servoRight.setPosition(rightServoPos + transferServoOffset);
+                servoLeft.setPosition(leftServoPos - transferServoOffset);
             }
 
             telemetry.addData("ShooterAngle", shooterAngle);
