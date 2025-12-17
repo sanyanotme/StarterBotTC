@@ -94,11 +94,11 @@ public class DrivetrainSB extends LinearOpMode {
             // Shooter Angle Adjuster
 
             if (gamepad1.rightBumperWasPressed()) {
-                shooterAngle--;
+                shooterAngle = shooterAngle - 0.1;
                 angleAdjust.setPosition(shooterAngle);
             }
             if (gamepad1.leftBumperWasPressed()) {
-                shooterAngle++;
+                shooterAngle = shooterAngle + 0.1;
                 angleAdjust.setPosition(shooterAngle);
             }
 
