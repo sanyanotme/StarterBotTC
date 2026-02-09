@@ -1,14 +1,18 @@
 package org.firstinspires.ftc.teamcode;
 
+import com.acmerobotics.dashboard.FtcDashboard;
+import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
+import com.acmerobotics.dashboard.config.Config;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.Servo;
 
+import org.firstinspires.ftc.robotcore.external.Telemetry;
 
 
-
+@Config
 @TeleOp
 public class DrivetrainSB extends LinearOpMode {
 
@@ -27,6 +31,13 @@ public class DrivetrainSB extends LinearOpMode {
     Servo servoRight; // transfer servo
     Servo servoLeft; // transfer servo
     Servo angleAdjust; // NON-FUNCTIONAL // servo adjusting the slope of the ramp 0 - 1
+    FtcDashboard test = FtcDashboard.getInstance(); // PID
+    Telemetry dashboardTelemetry = test.getTelemetry();
+    public static double p = 0; // PID
+    public static double i = 0; // PID
+    public static double d = 0; // PID
+    public static int target = 0; // PID
+    PIDController controller; // PID
 
     @Override
     public void runOpMode() throws InterruptedException {
@@ -42,12 +53,24 @@ public class DrivetrainSB extends LinearOpMode {
         backRight = hardwareMap.get(DcMotorEx.class, "rightDown");
         backRight.setZeroPowerBehavior(DcMotorEx.ZeroPowerBehavior.FLOAT);
         shooter = hardwareMap.get(DcMotor.class, "shooter");
+        shooter.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
 
         // servo mapping
         
         servoLeft = hardwareMap.get(Servo.class, "leftServo");
         servoRight = hardwareMap.get(Servo.class, "rightServo");
         angleAdjust = hardwareMap.get(Servo.class, "angleAdjust");
+
+        // PID
+
+        telemetry = new MultipleTelemetry(telemetry, test.getTelemetry());
+        controller = new PIDController(p, i, d);
+        telemetry = new MultipleTelemetry(
+                telemetry,
+                FtcDashboard.getInstance().getTelemetry()
+        );
+        int position = shooter.getCurrentPosition();
+        double power = controller.update(target, position);
 
         waitForStart();
 
@@ -61,6 +84,9 @@ public class DrivetrainSB extends LinearOpMode {
         waitForStart();
 
         while(opModeIsActive() && !isStopRequested()) {
+
+
+
 
             // Input requests
             rightServoPosition = servoRight.getPosition();
@@ -86,11 +112,11 @@ public class DrivetrainSB extends LinearOpMode {
 
             // Shooter Motor Toggle
 
-            if(gamepad1.crossWasPressed() && shooterToggleReversed){
+            if(gamepad1.aWasReleased() && shooterToggleReversed){
                 shooter.setPower(currentShooterPower);
                 shooterToggleReversed = false;
             }
-            if (gamepad1.crossWasReleased()) {
+            if (gamepad1.aWasReleased()) {
                 shooterToggleReversed = true;
                 if (currentShooterPower == shooterPower) {
                     currentShooterPower = 0;
@@ -120,12 +146,19 @@ public class DrivetrainSB extends LinearOpMode {
                 servoRight.setPosition(rightServoPosition + transferServoMovement);
                 servoLeft.setPosition(leftServoPosition - transferServoMovement);
             }
-            
+
+            // PID
+
+            shooter.setPower(power);
+
             // Telemetry
             
             telemetry.addData("ShooterAngle", shooterAngle);
+            telemetry.addData("position", position);
+            telemetry.addData("target", target);
+            telemetry.addData("power", power);
+            telemetry.addData("error", target - position);
             telemetry.update();
-
         }
     }
 }
