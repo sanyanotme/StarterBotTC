@@ -16,10 +16,8 @@ import org.firstinspires.ftc.robotcore.external.Telemetry;
 @TeleOp
 public class DrivetrainSB extends LinearOpMode {
 
-    DcMotorEx frontLeft; // Drivetrain Motor
-    DcMotorEx frontRight; // Drivetrain Motor
-    DcMotorEx backLeft; // Drivetrain Motor
-    DcMotorEx backRight; // Drivetrain Motor
+    DrivetrainCL HM = new DrivetrainCL(); // Drivetrain HardwareMap(names)
+    DrivetrainCL DT = new DrivetrainCL(); // Drivetrain Motor powers(movement)
     DcMotor shooter; // shooter flywheel motor
     boolean shooterToggleReversed = true; // state of shooter, true = released/updated, false = button held
     double shooterPower = 1; // power of shooter flywheel motor 0-1 
@@ -43,16 +41,7 @@ public class DrivetrainSB extends LinearOpMode {
     public void runOpMode() throws InterruptedException {
         
         // motor mapping
-        
-        frontLeft = hardwareMap.get(DcMotorEx.class, "leftUp");
-        frontLeft.setZeroPowerBehavior(DcMotorEx.ZeroPowerBehavior.FLOAT);
-        frontRight = hardwareMap.get(DcMotorEx.class, "rightUp");
-        frontRight.setZeroPowerBehavior(DcMotorEx.ZeroPowerBehavior.FLOAT);
-        backLeft = hardwareMap.get(DcMotorEx.class, "leftDown");
-        backLeft.setZeroPowerBehavior(DcMotorEx.ZeroPowerBehavior.FLOAT);
-        backRight = hardwareMap.get(DcMotorEx.class, "rightDown");
-        backRight.setZeroPowerBehavior(DcMotorEx.ZeroPowerBehavior.FLOAT);
-        shooter = hardwareMap.get(DcMotor.class, "shooter");
+        HM.HardwareMap();
         shooter.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
 
         // servo mapping
@@ -78,14 +67,12 @@ public class DrivetrainSB extends LinearOpMode {
         servoLeft.setDirection(Servo.Direction.REVERSE);
         servoRight.setPosition(rightServoPosition);
         servoLeft.setPosition(leftServoPosition);
-        frontLeft.setDirection(DcMotorEx.Direction.REVERSE);
-        backRight.setDirection(DcMotorEx.Direction.REVERSE);
+        DT.frontLeft.setDirection(DcMotorEx.Direction.REVERSE);
+        DT.backRight.setDirection(DcMotorEx.Direction.REVERSE);
 
         waitForStart();
 
         while(opModeIsActive() && !isStopRequested()) {
-
-
 
 
             // Input requests
@@ -95,20 +82,7 @@ public class DrivetrainSB extends LinearOpMode {
             
             // Mechanum Drivetrain
 
-            double y = gamepad1.left_stick_y;
-            double x = -gamepad1.left_stick_x;
-            double rx = -gamepad1.right_stick_x;
-
-            double denominator = Math.max(Math.abs(y) + Math.abs(x) + Math.abs(rx), 1);
-            double frontLeftPower = (y + x + rx) / denominator;
-            double backLeftPower = (y - x + rx) / denominator;
-            double frontRightPower = (y - x - rx) / denominator;
-            double backRightPower = (y + x - rx) / denominator;
-
-            frontLeft.setPower(frontLeftPower * 0.6);
-            backLeft.setPower(backLeftPower * 0.6);
-            frontRight.setPower(frontRightPower * 0.6);
-            backRight.setPower(backRightPower * 0.6);
+            DT.MechanumDriveTrain();
 
             // Shooter Motor Toggle
 
