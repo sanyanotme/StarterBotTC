@@ -38,6 +38,10 @@ public class DrivetrainCL extends LinearOpMode {
         frontRight.setPower(frontRightPower * 0.6);
         backRight.setPower(backRightPower * 0.6);
     }
+    public void MotorDirection(){
+        frontLeft.setDirection(DcMotorEx.Direction.REVERSE);
+        backRight.setDirection(DcMotorEx.Direction.REVERSE);
+    }
 
     public void runOpMode() throws InterruptedException {
 
