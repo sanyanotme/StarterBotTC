@@ -42,6 +42,8 @@ public class DrivetrainSB extends LinearOpMode {
 
         waitForStart();
 
+        // Motor and Servo Directions
+
         SV.ServoDirection();
 
         DT.MotorDirection();
