@@ -11,7 +11,7 @@ dependencies {
     implementation 'org.firstinspires.ftc:Vision:11.0.0'
     implementation 'androidx.appcompat:appcompat:1.2.0'
     implementation 'com.acmerobotics.dashboard:dashboard:0.5.1'
-    implementation 'com.acmerobotics.roadrunner:ftc:0.1.14'
+    implementation 'com.acmerobotics.roadrunner:core:0.5.6'
 
 }
 
